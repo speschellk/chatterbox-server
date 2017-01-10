@@ -30,10 +30,10 @@ var app = {
     app.startSpinner();
     app.fetch(false);
 
-    // Poll for new messages
-    setInterval(function() {
-      app.fetch(true);
-    }, 3000);
+    // // Poll for new messages
+    // setInterval(function() {
+    //   app.fetch(true);
+    // }, 3000);
   },
 
   send: function(message) {
@@ -41,7 +41,7 @@ var app = {
 
     // POST the message to the server
     $.ajax({
-      url: app.server + JSON.stringify(message),
+      url: app.server,
       type: 'POST',
       data: JSON.stringify(message),
       success: function (data) {
@@ -63,13 +63,13 @@ var app = {
       type: 'GET',
       data: { order: '-createdAt' },
       contentType: 'application/json',
+      dataType: 'json',
+      // add if needed 
       success: function(data) {
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
-
         // Store messages for caching later
         app.messages = data.results;
-
         // Get the last message
         var mostRecentMessage = data.results[data.results.length - 1];
 

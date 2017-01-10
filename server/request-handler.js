@@ -31,7 +31,7 @@ var defaultCorsHeaders = {
 
 };
 
-var container = [];
+var container = [{username: 'Jono', text: 'Do my bidding!', roomname: 'lobby', objectId: 0}, {username: 'littlekidlover', text: 'I am Michael Scott', roomname: 'lobby', objectId: 1}];
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -48,10 +48,6 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
- 
-  // console.log('what is response', response);
-
 
   // The outgoing status. 
   var statusCode = 200;
@@ -72,8 +68,10 @@ var requestHandler = function(request, response) {
     statusCode = 201;
     headers['Content-Type'] = 'application/json';
     request.on('data', function (data) {
-      var parsing = JSON.parse(data.toString());
-      container.push(parsing);
+      var parsedData = JSON.parse(data.toString());
+      console.log('inside request handler post', parsedData);
+      parsedData.objectId = container.length;
+      container.push(parsedData);
     });
   }
 
@@ -81,7 +79,19 @@ var requestHandler = function(request, response) {
     statusCode = 200;
   }
 
-  if (request.url !== '/classes/messages') {
+  if (request.method === 'OPTIONS' ) {
+    statusCode = 204;
+    var headers = {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+      'access-control-allow-headers': 'content-type, accept',
+      'access-control-max-age': 10 
+    };
+    headers['Content-Type'] = 'text/plain';
+  }
+
+  if (!request.url.includes('/classes/messages')) {
+    console.log('URL is a problem');
     statusCode = 404;
   }
   
