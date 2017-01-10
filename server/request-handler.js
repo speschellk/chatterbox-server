@@ -12,6 +12,27 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+// These headers will allow Cross-Origin Resource Sharing (CORS).
+// This code allows this server to talk to websites that
+// are on different domains, for instance, your chat client.
+//
+// Your chat client is running from a url like file://your/chat/client/index.html,
+// which is considered a different domain.
+//
+// Another way to get around this restriction is to serve you chat
+// client from this domain by setting up static file serving.
+
+
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+
+};
+
+var container = [];
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -28,9 +49,11 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log('what is request', request);
+ 
+  // console.log('what is response', response);
 
-  // The outgoing status.
+
+  // The outgoing status. 
   var statusCode = 200;
 
   // See the note below about CORS headers.
@@ -44,7 +67,24 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
+  
+
+  if (request.method === 'POST') {
+    statusCode = 201;
+    headers['Content-Type'] = 'application/json';
+    request.on('data', function (data) {
+      var parsing = JSON.parse(data.toString());
+      container.push(parsing);
+    });
+  }
+
+  if (request.url !== '/classes/messages') {
+    statusCode = 404;
+  }
+  
   response.writeHead(statusCode, headers);
+
+  response.write(JSON.stringify({results: container}));
 
 
   // Make sure to always call response.end() - Node may not send
@@ -54,25 +94,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end(JSON.stringify({results: []}));
+  response.end();
 };
 
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
-// Your chat client is running from a url like file://your/chat/client/index.html,
-// which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-
-};
-
-module.exports = requestHandler;
-
+module.exports.requestHandler = requestHandler;
