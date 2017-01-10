@@ -67,7 +67,6 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  
 
   if (request.method === 'POST') {
     statusCode = 201;
@@ -78,13 +77,15 @@ var requestHandler = function(request, response) {
     });
   }
 
+  if (request.method === 'GET') {
+    statusCode = 200;
+  }
+
   if (request.url !== '/classes/messages') {
     statusCode = 404;
   }
   
   response.writeHead(statusCode, headers);
-
-  response.write(JSON.stringify({results: container}));
 
 
   // Make sure to always call response.end() - Node may not send
@@ -94,7 +95,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end();
+  response.end(JSON.stringify({results: container}));
 };
 
 module.exports.requestHandler = requestHandler;
