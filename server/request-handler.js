@@ -31,7 +31,7 @@ var defaultCorsHeaders = {
 
 };
 
-var container = [{username: 'Jono', text: 'Do my bidding!', roomname: 'lobby', objectId: 0}, {username: 'littlekidlover', text: 'I am Michael Scott', roomname: 'lobby', objectId: 1}];
+var container = [{username: 'Jono', text: 'Do my bidding!', roomname: 'lobby', objectId: 0}, {username: 'goatYells', text: 'I am Michael Scott', roomname: 'lobby', objectId: 1}];
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -69,7 +69,6 @@ var requestHandler = function(request, response) {
     headers['Content-Type'] = 'application/json';
     request.on('data', function (data) {
       var parsedData = JSON.parse(data.toString());
-      console.log('inside request handler post', parsedData);
       parsedData.objectId = container.length;
       container.push(parsedData);
     });
@@ -91,7 +90,6 @@ var requestHandler = function(request, response) {
   }
 
   if (!request.url.includes('/classes/messages')) {
-    console.log('URL is a problem');
     statusCode = 404;
   }
   

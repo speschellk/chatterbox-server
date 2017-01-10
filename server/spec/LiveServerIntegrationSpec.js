@@ -73,5 +73,64 @@ describe('server', function() {
     });
   });
 
+  it('Should respond with a 204 response code for an OPTIONS request', function () {
+    var requestParams = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!'}
+    };
+    
+    request(requestParams, function(error, response, body) {
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        expect(response.statusCode).to.equal(204);
+        done();
+      });
+    });
 
+  });
+
+  it('Should send back available options for an OPTIONS request', function () {
+    var requestParams = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!'}
+    };
+
+    var options = {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+      'access-control-allow-headers': 'content-type, accept',
+      'access-control-max-age': 10,
+      'Content-Type': 'text/plain'
+    };
+
+    request(requestParams, function(error, response, body) {
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var parsedResponse = JSON.parse(response);
+        expect(parsedResponse.headers).to.equal(options);
+        done();
+      });
+    });
+  });
+
+  it('Should have an objectId for each message', function () {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!',
+      }
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].objectId).to.not.equal(undefined);
+        done();
+      });
+    });
+  });
 });
